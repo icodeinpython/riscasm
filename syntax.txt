@@ -1,0 +1,3 @@
+Everything is flat binary
+
+labels have end with colons
