@@ -1,1 +1,188 @@
-../ISA/isa.txt
+- Word size: 32 bit registers, 32 bit data bus, 32 bit instructions
+- Byte ordering: little endian
+- Register file: 32 bit general purpose registers X0-X31
+  - X0 is just 0, any writes are no-ops
+- 32 bit program counter
+
+Instruction Set:
+- R-Type - register: used for aritmetic and logical operations involving 3 registers
+  - Opcode - instruction type: 6 bits
+  - Rs - source register 1: 5 bits
+  - Rt - source register 2: 5 bits
+  - Rd - dest register: 5 bits
+  - Funct - specific function (add, sub, and, xor): 11 bits
+- I-type - intermediate: used for constants, or memory loads/stores
+ 			 where the immediate is an offset
+  - Opcode - instruction type: 6 bits
+  - Rs - Source register: 5 bits
+  - Rd - target register: 5 bits
+  - Immediate - sign extenended constant
+- J-type - jump: used for various kinds of unconditional jumps
+  - Opcode - jump instruction: 6 bits
+  - Address - address to jump to: 26 bits (lower 26 bits, if more bits
+				  are needed, use a register with 0 offset)
+
+All instructions:
+- R-Type:
+  - ADD Rd, Rs, Rt; Rd = Rs + Rt
+  - Sub Rd, Rs, Rt; Rd = Rs - Rt
+  - AND Rd, Rs, Rt; Rd = Rs & Rt
+  - OR Rd, Rs, Rt; Rd = Rs | Rt
+  - XOR Rd, Rs, Rt; Rd = Rs ^ Rt
+  - SLL Rd, Rs, Rt; Rd = Rs << Rt
+  - SRL Rd, Rs, Rt; Rd = Rs >> Rt
+  - SRA Rd, Rs, Rt; Rd = Rs >> Rt (sign extended)
+  - SLT Rd, Rs, Rt; Rd = (Rs < Rt) ? 1 : 0
+
+- I-Type:
+  - ADDI Rt, Rs, Imm; Rt = Rs + SignExtend(Imm)
+  - ANDI Rt, Rs, Imm; Rt = Rs & ZeroExtend(Imm)
+  - ORI Rt, Rs, Imm; Rt = Rs | ZeroExtend(Imm)
+  - LUI Rt, Imm; Rt = Imm
+
+- I-Type memory:
+  - LW Rt, Offset(Rs)
+  - SW Rt, Offset(Rs)
+
+- I-Type control flow:
+  - BEQ Rs, Rt, Offset; if Rs==Rt, PC = PC + 4 + SignExtend(Ofser)
+  - BNE Rs, Rt, Offset; if Rs!=Rt, PC = PC + 4 + SignExtend(Ofser)
+
+- J-type:
+  - J Target; PC = PC[high] | Target
+  - JAL Target; X31 = PC + 4, PC = PC[high] | Target
+  - JR Rs; PC=Rs
+
+
+Reg Codes:
+  x0 -> 0
+  x1 -> 1
+  x2 -> 2
+  ...
+  x31 -> 31 (0b11111)
+  
+Opcodes:
+  - Add:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 0        |
+  - Sub:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 1        |
+  - And:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 2        |
+  Or:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 3        |
+  Xor:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 4        |
+  SLL:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 5        |
+  SRL:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 6        |
+  SRA:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 7        |
+  SLT:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 0        |
+    | Rs      | 5    | Reg Code |
+    | Rt      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Func    | 11   | 8        |
+  ADDI:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 1        |
+    | Rs      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Imm     | 16   | Imm Val  |
+  ANDI:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 2        |
+    | Rs      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Imm     | 16   | Imm Val  |
+  ORI:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 3        |
+    | Rs      | 5    | Reg Code |
+    | Rd      | 5    | Reg Code |
+    | Imm     | 16   | Imm Val  |
+  LUI:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 4        |
+    | Rs      | 5    | Reg Code |
+    | Rsvd.   | 5    | 0        |
+    | Imm     | 16   | Imm Val  |
+  LW:
+    | Section | Bits | Value      |
+    | Opcode  | 6    | 5          |
+    | Rs      | 5    | Reg Code   |
+    | Rt      | 5    | Reg Code   |
+    | Offset  | 16   | Offset(Rs) |
+  SW:
+    | Section | Bits | Value      |
+    | Opcode  | 6    | 6          |
+    | Rs      | 5    | Reg Code   |
+    | Rt      | 5    | Reg Code   |
+    | Offset  | 16   | Offset(Rs) |
+  BEQ:
+    | Section | Bits | Value        |
+    | Opcode  | 6    | 7            |
+    | Rs      | 5    | Reg Code     |
+    | Rt      | 5    | Reg Code     |
+    | Offset  | 16   | Offset(PC+4) |
+  BNE:
+    | Section | Bits | Value        |
+    | Opcode  | 6    | 8            |
+    | Rs      | 5    | Reg Code     |
+    | Rt      | 5    | Reg Code     |
+    | Offset  | 16   | Offset(PC+4) |
+  J:
+    | Section | Bits | Value   |
+    | Opcode  | 6    | 9       |
+    | Address | 26   | Address |
+  JAL:
+    | Section | Bits | Value   |
+    | Opcode  | 6    | 10      |
+    | Address | 26   | Address |
+  JR:
+    | Section | Bits | Value    |
+    | Opcode  | 6    | 11       |
+    | Reg     | 5    | Reg Code |
+    | Rsvd    | 21   | 0        |
